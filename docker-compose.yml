@@ -1,0 +1,43 @@
+version: '2'
+services:
+  jenkins:
+    image: shimmi/jenkins:${JENKINS_VERSION}
+    ports:
+      - "${JENKINS_SERVER_PORT}:8080"
+      - "8100:50000"
+    volumes:
+      - ${JENKINS_DATA_DIR}/home:/var/jenkins_home
+    environment:
+      - JENKINS_ADMIN_PASS
+    links:
+      - gitlab
+      - sonar
+      - nexus
+
+  gitlab:
+    image: gitlab/gitlab-ce:${GITLAB_VERSION}
+    ports:
+      - "8222:22"
+      - "8280:80"
+      - "8243:443"
+    volumes:
+      - ${GITLAB_DATA_DIR}/etc:/etc/gitlab
+      - ${GITLAB_DATA_DIR}/logs:/var/log/gitlab
+      - ${GITLAB_DATA_DIR}/data:/var/opt/gitlab
+    environment:
+      - hostname=gitlab.example.com
+
+  nexus:
+    image: sonatype/nexus3:${NEXUS_VERSION}
+    ports:
+      - "8381:8081"
+    volumes:
+      - ${NEXUS_DATA_DIR}/data:/nexus-data
+
+  sonar:
+    image: sonarqube:${SONAR_VERSION}
+    ports:
+      - "8400:9000"
+      - "8492:9092"
+    volumes:
+      - ${SONAR_DATA_DIR}/data:/opt/sonarqube/data
